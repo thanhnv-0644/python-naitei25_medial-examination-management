@@ -105,7 +105,10 @@ export const appointmentService = {
       );
       return response.data;
     } catch (error) {
-      console.error(`Error fetching appointments for patient ${patientId}:`, error);
+      console.error(
+        `Error fetching appointments for patient ${patientId}:`,
+        error
+      );
       throw new Error("Không thể tải lịch khám của bệnh nhân");
     }
   },
@@ -179,7 +182,8 @@ export const appointmentService = {
           [AppointmentStatus.NO_SHOW]: "NO_SHOW",
           [AppointmentStatus.IN_PROGRESS]: "IN_PROGRESS",
         };
-        snakeCaseUpdateData.appointment_status = statusMapToBackend[appointmentData.appointmentStatus];
+        snakeCaseUpdateData.appointment_status =
+          statusMapToBackend[appointmentData.appointmentStatus];
       }
       if (appointmentData.doctorId !== undefined) {
         snakeCaseUpdateData.doctor_id = Number(appointmentData.doctorId);
@@ -292,9 +296,7 @@ export const appointmentService = {
     pageSize: number;
   }> {
     try {
-      const response = await api.get(
-        `/appointments/`
-      );
+      const response = await api.get(`/appointments/`);
       return response.data;
     } catch (error) {
       console.error("Error fetching all appointments:", error);
@@ -331,9 +333,24 @@ export const appointmentService = {
   ): Promise<Schedule[]> {
     try {
       const response = await api.get<Schedule[]>(
-        `/schedules/?doctorId=${doctorId}&workDate=${date}`
+        `/schedules/?doctor_id=${doctorId}&workDate=${date}`
       );
-      return response.data;
+      console.log(
+        "🔍 appointmentService.getSchedulesByDoctorAndDate - Response data:",
+        response.data
+      );
+
+      // Thêm bước lọc để chỉ trả về schedules của bác sĩ được chọn
+      const filteredSchedules = response.data.filter(
+        (schedule: any) => schedule.doctor_id === doctorId
+      );
+
+      console.log(
+        `🔍 Filtered schedules for doctor ${doctorId}:`,
+        filteredSchedules
+      );
+
+      return filteredSchedules;
     } catch (error) {
       console.error(
         `Error fetching schedules for doctor ${doctorId} on date ${date}:`,
