@@ -111,6 +111,23 @@ export const doctorService = {
   },
 
   // Create doctor
+  // async createDoctor(doctorData: CreateDoctorRequest): Promise<Doctor> {
+  //   try {
+  //     const requestBody = {
+  //       ...doctorData,
+  //       first_name: doctorData.first_name,
+  //       last_name: doctorData.last_name,
+  //       gender: doctorData.gender === "MALE" ? "M" : "F",
+  //       type: doctorData.type === "EXAMINATION" ? "EXAMINATION" : "SERVICE",
+  //     };
+  //     const response = await api.post<Doctor>("/doctors/", requestBody);
+  //     return response.data;
+  //   } catch (error: any) {
+  //     console.error("Error creating doctor:", error);
+  //     throw new Error("Không thể tạo bác sĩ mới");
+  //   }
+  // },
+
   async createDoctor(doctorData: CreateDoctorRequest): Promise<Doctor> {
     try {
       const requestBody = {
@@ -118,16 +135,26 @@ export const doctorService = {
         first_name: doctorData.first_name,
         last_name: doctorData.last_name,
         gender: doctorData.gender === "MALE" ? "M" : "F",
-        type: doctorData.type === "EXAMINATION" ? "EXAMINATION" : "SERVICE",
+        type: doctorData.type === "EXAMINATION" ? "E" : "S",
       };
-      const response = await api.post<Doctor>("/doctors/", requestBody);
+  
+      // dùng URL tuyệt đối để chắc chắn đúng endpoint
+      const response = await api.post<Doctor>(
+        "http://127.0.0.1:8000/api/v1/doctors/",
+        requestBody
+      );
       return response.data;
     } catch (error: any) {
-      console.error("Error creating doctor:", error);
-      throw new Error("Không thể tạo bác sĩ mới");
+      // nếu server có trả message/chi tiết lỗi, show ra cho dễ debug
+      const serverMsg =
+        error?.response?.data?.detail ||
+        error?.response?.data?.message ||
+        JSON.stringify(error?.response?.data);
+      console.error("Error creating doctor:", serverMsg || error);
+      throw new Error(serverMsg || "Không thể tạo bác sĩ mới");
     }
   },
-
+  
   // Update doctor
   async updateDoctor(
     doctorId: number,
